@@ -1,4 +1,3 @@
-// src/mocks/handlers/auth.ts
 import { http, HttpResponse } from 'msw'
 import type { User, LoginCredentials } from '@/types/auth'
 
@@ -10,8 +9,8 @@ const mockUser: User = {
 }
 
 export const authHandlers = [
-  // Login handler
-  http.post('/api/auth/login', async ({ request }) => {
+  // Note: Changed the path to match exactly
+  http.post('http://localhost:5173/api/auth/login', async ({ request }) => {
     try {
       const credentials = await request.json() as LoginCredentials;
       
@@ -42,28 +41,5 @@ export const authHandlers = [
         { status: 400 }
       )
     }
-  }),
-
-  // Add the GET /api/auth/me handler
-  http.get('/api/auth/me', ({ request }) => {
-    const authHeader = request.headers.get('Authorization')
-
-    if (!authHeader?.startsWith('Bearer ')) {
-      return HttpResponse.json(
-        { message: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
-    // Simple token validation (in real app would verify JWT)
-    const token = authHeader.split('Bearer ')[1]
-    if (token !== 'mock-jwt-token') {
-      return HttpResponse.json(
-        { message: 'Invalid token' },
-        { status: 401 }
-      )
-    }
-
-    return HttpResponse.json({ user: mockUser }, { status: 200 })
   })
 ]

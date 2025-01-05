@@ -9,9 +9,8 @@ interface AuthResponse {
 export const authService = {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
-      console.log('Attempting login with:', { email: credentials.email });
       const { data } = await api.post<AuthResponse>('/auth/login', credentials);
-      console.log('Login response:', data);
+      // Store token immediately after successful login
       localStorage.setItem('token', data.token);
       return data;
     } catch (error) {
