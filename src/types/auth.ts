@@ -4,6 +4,8 @@ export interface User {
   name: string;
   preferredLanguage: 'en' | 'ja';
   phoneNumber?: string;
+  profilePicture?: any;
+  isVerified?: boolean;
   paymentSettings: {
     defaultMethod: 'bank_account' | 'credit_card' | 'credify_balance';
     transactionLimit: number;

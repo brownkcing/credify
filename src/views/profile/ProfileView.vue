@@ -24,93 +24,46 @@
       <div v-if="user" class="bg-white shadow rounded-lg">
         <!-- User Profile Section -->
         <div class="p-6 border-b">
-          <h2 class="text-xl font-semibold text-gray-900 mb-6">Basic Information</h2>
-          
-          <!-- View Mode -->
-          <div v-if="!isEditing" class="space-y-4">
-            <div>
-              <label class="text-sm font-medium text-gray-500">Name</label>
-              <p class="mt-1 text-lg">{{ user.name }}</p>
-            </div>
-            
-            <div>
-              <label class="text-sm font-medium text-gray-500">Email</label>
-              <p class="mt-1 text-lg">{{ user.email }}</p>
-            </div>
-            
-            <div>
-              <label class="text-sm font-medium text-gray-500">Language</label>
-              <p class="mt-1 text-lg">{{ user.preferredLanguage === 'en' ? 'English' : '日本語' }}</p>
-            </div>
-
-            <div>
-              <label class="text-sm font-medium text-gray-500">Phone Number</label>
-              <p class="mt-1 text-lg">{{ user.phoneNumber || 'Not set' }}</p>
-            </div>
-          </div>
-
-          <!-- Edit Mode -->
-          <div v-else class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Name</label>
-              <input
-                v-model="editForm.name"
-                type="text"
-                @blur="validateField('name')"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                :class="{ 'border-red-500': errors.name }"
-              />
-              <p v-if="errors.name" class="mt-1 text-sm text-red-600">
-                {{ errors.name }}
-              </p>
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Phone Number</label>
-              <input
-                v-model="editForm.phoneNumber"
-                type="tel"
-                @blur="validateField('phoneNumber')"
-                placeholder="+81 90-1234-5678"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                :class="{ 'border-red-500': errors.phoneNumber }"
-              />
-              <p v-if="errors.phoneNumber" class="mt-1 text-sm text-red-600">
-                {{ errors.phoneNumber }}
-              </p>
-              <p class="mt-1 text-sm text-gray-500">Format: +81 XX-XXXX-XXXX</p>
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Language</label>
-              <select
-                v-model="editForm.preferredLanguage"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              >
-                <option value="en">English</option>
-                <option value="ja">日本語</option>
-              </select>
-            </div>
-
-            <div class="pt-4 flex justify-end space-x-4">
-              <span v-if="saveError" class="text-red-600 mr-auto">{{ saveError }}</span>
-              <button
-                @click="isEditing = false"
-                :disabled="isSaving"
-                class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button
-                @click="handleSave"
-                :disabled="isSaving || hasErrors || !isFormValid"
-                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-              >
-                {{ isSaving ? 'Saving...' : 'Save Changes' }}
-              </button>
-            </div>
-          </div>
+    <div class="flex items-center space-x-6">
+      <!-- Profile Picture Component -->
+      <ProfilePicture
+        :user-name="user.name"
+        :image-url="user.profilePicture"
+        @update="handleProfilePictureUpdate"
+      />
+      
+      <div>
+        <h2 class="text-xl font-semibold text-gray-900">{{ user.name }}</h2>
+        <div class="mt-1 flex items-center space-x-2">
+          <span class="text-sm text-gray-500">{{ user.email }}</span>
+          <!-- Verification Badge -->
+          <span v-if="user.isVerified" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+            <svg class="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+            Verified
+          </span>
         </div>
+        <!-- Account Status -->
+        <div class="mt-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+          Account Status: Active
+        </div>
+      </div>
+    </div>
+
+    <!-- Account Activity -->
+    <div class="mt-6 border-t pt-4">
+      <h3 class="text-sm font-medium text-gray-500">Recent Activity</h3>
+      <div class="mt-2 space-y-2">
+        <div v-for="(activity, index) in recentActivity" :key="index" class="text-sm">
+          <span class="text-gray-600">{{ activity.date }}</span>
+          <span class="mx-2">·</span>
+          <span>{{ activity.action }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
 
         <!-- Payment Settings Section -->
         <div class="p-6">
@@ -233,6 +186,7 @@ import { validation } from '@/utils/validation';
 import { profileService } from '@/services/api/profile.service';
 import BankLinkModal from '@/components/profile/BankLinkModal.vue';
 import CardLinkModal from '@/components/profile/CardLinkModal.vue';
+import ProfilePicture from '@/components/profile/ProfilePicture.vue';
 
 
 const router = useRouter();
@@ -365,6 +319,30 @@ const handleCardLinked = (cardInfo: { type: string; lastFourDigits: string }) =>
     };
   }
 }
+
+const recentActivity = ref([
+  { date: '2024-01-05', action: 'Changed password' },
+  { date: '2024-01-03', action: 'Updated phone number' },
+  { date: '2024-01-01', action: 'Account created' }
+]);
+
+const handleProfilePictureUpdate = async (file: File) => {
+  try {
+    // Here you would typically upload the file to your server
+    console.log('Uploading file:', file.name);
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Create a temporary URL for preview
+    const imageUrl = URL.createObjectURL(file);
+    if (user.value) {
+      user.value.profilePicture  = imageUrl;
+    }
+  } catch (error) {
+    console.error('Failed to update profile picture:', error);
+  }
+};
 
 const handleSave = async () => {
   validateForm();
