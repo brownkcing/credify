@@ -24,6 +24,7 @@
       <div v-if="user" class="bg-white shadow rounded-lg">
         <!-- User Profile Section -->
         <div class="p-6 border-b">
+          <h2 class="text-xl font-semibold text-gray-900 mb-6">Basic Information</h2>
     <div class="flex items-center space-x-6">
       <!-- Profile Picture Component -->
       <ProfilePicture
@@ -31,7 +32,7 @@
         :image-url="user.profilePicture"
         @update="handleProfilePictureUpdate"
       />
-      
+
       <div>
         <h2 class="text-xl font-semibold text-gray-900">{{ user.name }}</h2>
         <div class="mt-1 flex items-center space-x-2">
@@ -51,18 +52,101 @@
       </div>
     </div>
 
+    <div v-if="!isEditing" class="space-y-4">
+            <div>
+              <label class="text-sm font-medium text-gray-500">Name</label>
+              <p class="mt-1 text-lg">{{ user.name }}</p>
+            </div>
+            
+            <div>
+              <label class="text-sm font-medium text-gray-500">Email</label>
+              <p class="mt-1 text-lg">{{ user.email }}</p>
+            </div>
+            
+            <div>
+              <label class="text-sm font-medium text-gray-500">Language</label>
+              <p class="mt-1 text-lg">{{ user.preferredLanguage === 'en' ? 'English' : '日本語' }}</p>
+            </div>
+
+            <div>
+              <label class="text-sm font-medium text-gray-500">Phone Number</label>
+              <p class="mt-1 text-lg">{{ user.phoneNumber || 'Not set' }}</p>
+            </div>
+          </div>
+
+          <!-- Edit Mode -->
+          <div v-else class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Name</label>
+              <input
+                v-model="editForm.name"
+                type="text"
+                @blur="validateField('name')"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                :class="{ 'border-red-500': errors.name }"
+              />
+              <p v-if="errors.name" class="mt-1 text-sm text-red-600">
+                {{ errors.name }}
+              </p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Phone Number</label>
+              <input
+                v-model="editForm.phoneNumber"
+                type="tel"
+                @blur="validateField('phoneNumber')"
+                placeholder="+81 90-1234-5678"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                :class="{ 'border-red-500': errors.phoneNumber }"
+              />
+              <p v-if="errors.phoneNumber" class="mt-1 text-sm text-red-600">
+                {{ errors.phoneNumber }}
+              </p>
+              <p class="mt-1 text-sm text-gray-500">Format: +81 XX-XXXX-XXXX</p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Language</label>
+              <select
+                v-model="editForm.preferredLanguage"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              >
+                <option value="en">English</option>
+                <option value="ja">日本語</option>
+              </select>
+            </div>
+
+            <div class="pt-4 flex justify-end space-x-4">
+              <span v-if="saveError" class="text-red-600 mr-auto">{{ saveError }}</span>
+              <button
+                @click="isEditing = false"
+                class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                @click="handleSave"
+                :disabled="isSaving || hasErrors || !isFormValid"
+                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+              >
+                {{ isSaving ? 'Saving...' : 'Save Changes' }}
+              </button>
+            </div>
+          </div>
+
     <!-- Account Activity -->
-    <div class="mt-6 border-t pt-4">
-      <h3 class="text-sm font-medium text-gray-500">Recent Activity</h3>
-      <div class="mt-2 space-y-2">
-        <div v-for="(activity, index) in recentActivity" :key="index" class="text-sm">
-          <span class="text-gray-600">{{ activity.date }}</span>
-          <span class="mx-2">·</span>
-          <span>{{ activity.action }}</span>
+      <div class="mt-6 border-t pt-4">
+        <h3 class="text-sm font-medium text-gray-500">Recent Activity</h3>
+        <div class="mt-2 space-y-2">
+          <div v-for="(activity, index) in recentActivity" :key="index" class="text-sm">
+            <span class="text-gray-600">{{ activity.date }}</span>
+            <span class="mx-2">·</span>
+            <span>{{ activity.action }}</span>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
 
         <!-- Payment Settings Section -->
@@ -70,12 +154,25 @@
           <h2 class="text-xl font-semibold text-gray-900 mb-6">Payment Settings</h2>
 
           <!-- Balance Display -->
-          <div class="mb-6 p-4 bg-blue-50 rounded-lg">
-            <label class="text-sm font-medium text-gray-500">Credify Balance</label>
-            <p class="text-2xl font-bold text-blue-600">
-              {{ formatCurrency(user.paymentSettings.balance) }}
-            </p>
-          </div>
+          <div class="mb-6 flex items-center justify-between">
+        <div class="p-4 bg-blue-50 rounded-lg flex-grow">
+          <label class="text-sm font-medium text-gray-500">Credify Balance</label>
+          <p class="text-2xl font-bold text-blue-600">
+            {{ formatCurrency(user.paymentSettings.balance) }}
+          </p>
+        </div>
+        <div class="ml-4 space-x-2">
+          <button 
+            @click="router.push('/transactions')"
+            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center"
+          >
+            <span class="mr-2">Transactions</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      </div>
 
           <!-- Default Payment Method -->
           <div class="mb-6">
