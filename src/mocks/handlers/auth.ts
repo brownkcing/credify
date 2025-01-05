@@ -6,7 +6,22 @@ const mockUser: User = {
   email: 'test@example.com',
   name: 'Test User',
   preferredLanguage: 'en',
-  phoneNumber: '+81 90-1234-5678'
+  phoneNumber: '+81 90-1234-5678',
+  paymentSettings: {
+    defaultMethod: 'credify_balance',
+    transactionLimit: 100000,
+    balance: 50000,
+    bankAccount: {
+      isLinked: true,
+      bankName: 'MUFG Bank',
+      lastFourDigits: '4321'
+    },
+    creditCard: {
+      isLinked: true,
+      type: 'Visa',
+      lastFourDigits: '1234'
+    }
+  }
 }
 
 export const authHandlers = [
