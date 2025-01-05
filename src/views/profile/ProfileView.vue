@@ -195,6 +195,19 @@
                 {{ user.paymentSettings.creditCard?.isLinked ? 'Change' : 'Link' }}
               </button>
             </div>
+
+            <BankLinkModal 
+              :is-open="showBankModal"
+              @close="showBankModal = false"
+              @linked="handleBankLinked"
+            />
+
+            <CardLinkModal
+              :is-open="showCardModal"
+              @close="showCardModal = false"
+              @linked="handleCardLinked"
+            />
+
           </div>
         </div>
       </div>
@@ -218,12 +231,17 @@ import { useRouter } from 'vue-router';
 import { useAuth } from '@/composables/useAuth';
 import { validation } from '@/utils/validation';
 import { profileService } from '@/services/api/profile.service';
+import BankLinkModal from '@/components/profile/BankLinkModal.vue';
+import CardLinkModal from '@/components/profile/CardLinkModal.vue';
+
 
 const router = useRouter();
 const { user, loading, error, checkAuth, logout } = useAuth();
 const isEditing = ref(false);
 const saveError = ref<string | null>(null);
 const isSaving = ref(false);
+const showBankModal = ref(false);
+const showCardModal = ref(false);
 
 const editForm = ref({
   name: '',
@@ -322,14 +340,31 @@ const updateDefaultMethod = (method: typeof paymentMethods[number]['value']) => 
 };
 
 const handleLinkBank = () => {
-  // TODO: Implement bank linking flow
-  console.log('Opening bank linking flow');
+  showBankModal.value = true;
 };
 
 const handleLinkCard = () => {
-  // TODO: Implement card linking flow
-  console.log('Opening card linking flow');
+  showCardModal.value = true;
 };
+
+const handleBankLinked = (bankInfo: { bankName: string; lastFourDigits: string }) => {
+  if (user.value && user.value.paymentSettings.bankAccount) {
+    user.value.paymentSettings.bankAccount = {
+      isLinked: true,
+      ...bankInfo
+    };
+  }
+};
+
+const handleCardLinked = (cardInfo: { type: string; lastFourDigits: string }) => {
+  // Update user's card info
+  if (user.value && user.value.paymentSettings.creditCard) {
+    user.value.paymentSettings.creditCard = {
+      isLinked: true,
+      ...cardInfo
+    };
+  }
+}
 
 const handleSave = async () => {
   validateForm();
