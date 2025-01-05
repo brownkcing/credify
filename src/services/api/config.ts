@@ -30,16 +30,4 @@ api.interceptors.request.use(
   }
 );
 
-// Add response interceptor for error handling
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Clear token on unauthorized response
-      localStorage.removeItem('token');
-    }
-    return Promise.reject(error);
-  }
-);
-
 export default api;

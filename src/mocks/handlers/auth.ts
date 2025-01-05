@@ -5,11 +5,11 @@ const mockUser: User = {
   id: '1',
   email: 'test@example.com',
   name: 'Test User',
-  preferredLanguage: 'en'
+  preferredLanguage: 'en',
+  phoneNumber: '+81 90-1234-5678'
 }
 
 export const authHandlers = [
-  // Note: Changed the path to match exactly
   http.post('http://localhost:5173/api/auth/login', async ({ request }) => {
     try {
       const credentials = await request.json() as LoginCredentials;
@@ -41,5 +41,20 @@ export const authHandlers = [
         { status: 400 }
       )
     }
+  }),
+
+  http.get('http://localhost:5173/api/auth/me', ({ request }) => {
+    console.log('GET /me handler called');
+    const authHeader = request.headers.get('Authorization');
+    console.log('Auth header:', authHeader);
+
+    if (!authHeader?.startsWith('Bearer ')) {
+      return HttpResponse.json(
+        { message: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    return HttpResponse.json({ user: mockUser });
   })
 ]

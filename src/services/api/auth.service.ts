@@ -10,7 +10,6 @@ export const authService = {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
       const { data } = await api.post<AuthResponse>('/auth/login', credentials);
-      // Store token immediately after successful login
       localStorage.setItem('token', data.token);
       return data;
     } catch (error) {

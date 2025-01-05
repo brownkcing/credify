@@ -1,21 +1,28 @@
 import { http, HttpResponse } from 'msw'
-import type { User } from '@/types/auth'
+import type { Profile, ProfileUpdateData } from '@/types/profile'
 
 export const profileHandlers = [
-  http.get('/api/profile', ({ request }) => {
+  http.patch('http://localhost:5173/api/profile', async ({ request }) => {
     const authHeader = request.headers.get('Authorization')
 
     if (!authHeader?.startsWith('Bearer ')) {
       return new HttpResponse(null, { status: 401 })
     }
 
-    const mockUserProfile: User = {
-      id: '1',
-      email: 'test@example.com',
-      name: 'Test User',
-      preferredLanguage: 'en'
+    try {
+      const updateData = await request.json() as ProfileUpdateData;
+      
+      return HttpResponse.json({
+        id: '1',
+        ...updateData,
+        updatedAt: new Date().toISOString(),
+        createdAt: '2024-01-05T00:00:00.000Z'
+      })
+    } catch (error) {
+      return HttpResponse.json(
+        { message: 'Invalid request format' },
+        { status: 400 }
+      )
     }
-
-    return HttpResponse.json(mockUserProfile)
   })
 ]

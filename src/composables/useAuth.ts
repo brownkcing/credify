@@ -23,13 +23,9 @@ export function useAuth() {
     }
   };
 
-  const logout = () => {
-    user.value = null;
-    localStorage.removeItem('token');
-  };
-
   const checkAuth = async () => {
     if (!localStorage.getItem('token')) {
+      console.log('No token found');
       user.value = null;
       return null;
     }
@@ -38,16 +34,24 @@ export function useAuth() {
     error.value = null;
     
     try {
+      console.log('Fetching current user...');
       const currentUser = await authService.getCurrentUser();
+      console.log('Current user:', currentUser);
       user.value = currentUser;
       return currentUser;
     } catch (err) {
+      console.error('Error in checkAuth:', err);
       error.value = err instanceof Error ? err.message : 'An unexpected error occurred';
       user.value = null;
       throw error;
     } finally {
       loading.value = false;
     }
+  };
+
+  const logout = () => {
+    user.value = null;
+    localStorage.removeItem('token');
   };
 
   return {
