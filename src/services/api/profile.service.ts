@@ -1,14 +1,15 @@
 import api from './config';
-import type { Profile, ProfileUpdateData } from '@/types/profile';
+import type { User } from '@/types/auth';
+
+interface UpdateProfileData {
+  name?: string;
+  preferredLanguage?: 'en' | 'ja';
+  phoneNumber?: string;
+}
 
 export const profileService = {
-  async getProfile(): Promise<Profile> {
-    const { data } = await api.get<Profile>('/profile');
-    return data;
-  },
-
-  async updateProfile(updateData: ProfileUpdateData): Promise<Profile> {
-    const { data } = await api.patch<Profile>('/profile', updateData);
-    return data;
+  async updateProfile(data: UpdateProfileData): Promise<User> {
+    const { data: responseData } = await api.patch<User>('/profile', data);
+    return responseData;
   }
 };
