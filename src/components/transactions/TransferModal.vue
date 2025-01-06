@@ -1,5 +1,5 @@
 <template>
-  <Modal :is-open="true" @close="$emit('close')" class="max-w-lg">
+  <Modal :is-open="true" @close="$emit('close')">
     <template #title>New Transfer</template>
 
     <!-- Stepper -->
